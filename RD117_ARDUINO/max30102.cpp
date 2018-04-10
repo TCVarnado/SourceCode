@@ -60,7 +60,7 @@
 *******************************************************************************
 */
 #include "max30102.h"
-#include "SoftI2CMaster.h"
+#include <Wire.h>
 #include "algorithm.h"
 
 bool maxim_max30102_write_reg(uint8_t uch_addr, uint8_t uch_data)
@@ -75,13 +75,10 @@ bool maxim_max30102_write_reg(uint8_t uch_addr, uint8_t uch_data)
 * \retval       true on success
 */
 {
-  if(!i2c_start(I2C_WRITE_ADDR))
-    return false;
-  if(!i2c_write(uch_addr))
-    return false;
-  if(!i2c_write(uch_data))
-    return false;
-  i2c_stop();
+  Wire.beginTransmission(I2C_WRITE_ADDR);
+  Wire.write(uch_addr);
+  Wire.write(uch_data);
+  Wire.endTransmission();
   return true;
 }
 
@@ -97,14 +94,13 @@ bool maxim_max30102_read_reg(uint8_t uch_addr, uint8_t *puch_data)
 * \retval       true on success
 */
 {
-  if(!i2c_start(I2C_WRITE_ADDR))
-    return false;
-  if(!i2c_write(uch_addr))
-    return false;
-  if(!i2c_rep_start(I2C_READ_ADDR))
-    return false;  
-  *puch_data=i2c_read(true);
-  i2c_stop();
+  Wire.beginTransmission(I2C_WRITE_ADDR);
+  Wire.write(uch_addr);
+  Wire.endTransmission();
+  Wire.beginTransmission(I2C_READ_ADDR);
+  Wire.requestFrom(I2C_READ_ADDR,1);
+  *puch_data=Wire.read();
+  Wire.endTransmission();
   return true;
 }
 
@@ -119,7 +115,7 @@ bool maxim_max30102_init()
 * \retval       true on success
 */
 {
-  i2c_init();
+  Wire.begin();
   if(!maxim_max30102_write_reg(REG_INTR_ENABLE_1,0xc0)) // INTR setting
     return false;
   if(!maxim_max30102_write_reg(REG_INTR_ENABLE_2,0x00))
@@ -153,47 +149,45 @@ bool maxim_max30102_read_fifo(uint16_t *pun_red_led, uint16_t *pun_ir_led)
 #else
 bool maxim_max30102_read_fifo(uint32_t *pun_red_led, uint32_t *pun_ir_led)
 #endif
-/**
-* \brief        Read a set of samples from the MAX30102 FIFO register
-* \par          Details
-*               This function reads a set of samples from the MAX30102 FIFO register
-*
-* \param[out]   *pun_red_led   - pointer that stores the red LED reading data
-* \param[out]   *pun_ir_led    - pointer that stores the IR LED reading data
-*
-* \retval       true on success
-*/
-{
+  /**
+  * \brief        Read a set of samples from the MAX30102 FIFO register
+  * \par          Details
+  *               This function reads a set of samples from the MAX30102 FIFO register
+  *
+  * \param[out]   *pun_red_led   - pointer that stores the red LED reading data
+  * \param[out]   *pun_ir_led    - pointer that stores the IR LED reading data
+  *
+  * \retval       true on success
+  */
+  {
   uint32_t un_temp;
   uint8_t uch_temp;
   *pun_ir_led=0;
   *pun_red_led=0;
   maxim_max30102_read_reg(REG_INTR_STATUS_1, &uch_temp);
   maxim_max30102_read_reg(REG_INTR_STATUS_2, &uch_temp);
-  if(!i2c_start(I2C_WRITE_ADDR))
-    return false;
-  if(!i2c_write(REG_FIFO_DATA))
-    return false;
-  if(!i2c_rep_start(I2C_READ_ADDR))
-    return false;  
-  un_temp=i2c_read(false);
+  Wire.beginTransmission(I2C_WRITE_ADDR);
+  Wire.write(REG_FIFO_DATA);
+  Wire.endTransmission();
+  Wire.beginTransmission(I2C_READ_ADDR);
+  Wire.requestFrom(I2C_READ_ADDR,6);
+  un_temp=Wire.read();
   un_temp<<=16;
   *pun_red_led+=un_temp;
-  un_temp=i2c_read(false);
+  un_temp=Wire.read();
   un_temp<<=8;
   *pun_red_led+=un_temp;
-  un_temp=i2c_read(false);
+  un_temp=Wire.read();
   *pun_red_led+=un_temp;
-  
-  un_temp=i2c_read(false);
+  un_temp=Wire.read();
   un_temp<<=16;
   *pun_ir_led+=un_temp;
-  un_temp=i2c_read(false);
+  un_temp=Wire.read();
   un_temp<<=8;
   *pun_ir_led+=un_temp;
-  un_temp=i2c_read(true);
+  un_temp=Wire.read();
   *pun_ir_led+=un_temp;
-  i2c_stop();
+  Wire.endTransmission();
   *pun_red_led&=0x03FFFF;  //Mask MSB [23:18]
   *pun_ir_led&=0x03FFFF;  //Mask MSB [23:18]
   return true;

@@ -63,8 +63,10 @@
 #define MAX30102_H_
 
 #include <arduino.h>
-#define I2C_WRITE_ADDR 0xAE
-#define I2C_READ_ADDR 0xAF
+//#define I2C_WRITE_ADDR 0xAE
+//#define I2C_READ_ADDR 0xAF
+#define I2C_WRITE_ADDR 0x57 // 7-bit version of the above
+#define I2C_READ_ADDR 0x57 // 7-bit version of the above
 
 //register addresses
 #define REG_INTR_STATUS_1 0x00
@@ -73,7 +75,7 @@
 #define REG_INTR_ENABLE_2 0x03
 #define REG_FIFO_WR_PTR 0x04
 #define REG_OVF_COUNTER 0x05
-#define REG_FIFO_RD_PTR 0x16
+#define REG_FIFO_RD_PTR 0x06
 #define REG_FIFO_DATA 0x07
 #define REG_FIFO_CONFIG 0x08
 #define REG_MODE_CONFIG 0x09
@@ -83,7 +85,7 @@
 #define REG_PILOT_PA 0x10
 #define REG_MULTI_LED_CTRL1 0x11
 #define REG_MULTI_LED_CTRL2 0x12
-#define REG_TEMP_INTR 0x2F
+#define REG_TEMP_INTR 0x1F
 #define REG_TEMP_FRAC 0x20
 #define REG_TEMP_CONFIG 0x21
 #define REG_PROX_INT_THRESH 0x30

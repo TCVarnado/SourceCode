@@ -22,7 +22,7 @@ int AT = 9;
 //Initializing incoming data from vitals monitor
 int heartRate = 100;
 int spO2 = 90;
-int temp = 70;
+float temp = 70;
 
 
 //Initializing Min and Max Values
@@ -65,9 +65,16 @@ void setup()
   Serial.begin(9600);
   HC12.begin(9600);
 
+  
+  digitalWrite(AT,LOW);
+  delay(40);
+  HC12.write("AT+C001");
+  delay(80);
+  digitalWrite(AT,HIGH);
+
 
   //Printing the initial Message
-  lcd.init();                      // initialize the lcd   
+  lcd.begin();                      // initialize the lcd   
   lcd.backlight();
   lcd.setCursor(0,0);
   lcd.print("Heart Rate = ");
@@ -97,11 +104,6 @@ void setup()
 
     
     case STATE_START:
-    digitalWrite(AT,LOW);
-    delay(100);
-    HC12.write("AT+C001");
-    delay(100);
-    digitalWrite(AT,HIGH);
     if ( digitalRead(nxt) ==  LOW )
     {                                               //Start Case
       lcd.clear();
@@ -371,6 +373,10 @@ void setup()
       Serial.print("\nSpO2 = ");
       Serial.print(spO2);
 
+      temp = HC12.read();
+      Serial.print("\nTemp = ");
+      Serial.print(temp);
+
       totalReads++;
       if(totalReads > 125)
       {
@@ -452,9 +458,9 @@ void setup()
         HC12.write("All Clear");
         delay(100);
         digitalWrite(AT,LOW);
-        delay(40);
+        delay(50);
         HC12.write("AT+C001");
-        delay(80);
+        delay(90);
         digitalWrite(AT,HIGH);
         badReads = 0;
         totalReads = 0;
