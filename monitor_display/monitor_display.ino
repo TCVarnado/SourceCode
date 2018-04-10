@@ -1,7 +1,12 @@
-//SmrazaKeen
-//Compatible with the Arduino IDE 1.6.6-1.6.9
-//Library version:1.2
-//#include <Wire.h> 
+/*
+  Monitor Display Code
+  
+  Code written by Taylor Varnado and NAP Monitor team
+  
+  Mostly Functional 2.0
+*/
+
+
 #include <LiquidCrystal_I2C.h>
 
 #include <SoftwareSerial.h>
